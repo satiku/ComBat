@@ -1,0 +1,26 @@
+
+
+
+
+{% for item in data_addresses %}
+address-object ipv4 {{  item.addressname  }}
+      name {{  item.addressname  }}
+      host {{  item.address  }}
+      zone {{  item.zone  }}
+      exit  {% endfor %}
+
+
+
+{% for item in data_addresses %}
+  {% for group in item.addressgroup  %}
+    {% if group != "" %}
+    
+address-group ipv4 {{  group  }}
+    name {{  group  }}
+    address-object ipv4  "{{  item.addressname  }}"
+    exit
+  
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+end
