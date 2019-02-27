@@ -1,0 +1,106 @@
+set system host-name {{  data_global.hostname  }}-sw
+set chassis aggregated-devices ethernet device-count {{  data_global.aggregated_device_count  }}
+
+set system login message "\nThis system is privately owned and monitored; its use is restricted to unauthorized users.\nUnauthorized access is expressly prohibited and will be prosecuted.  \nAll information on this system should be considered to be the property of company owning \nthe system unless indicated to the contrary.\nYou are not allowed to access this system unless you are authorized to do so and have \nagreed to respect all rights of the company owning the system.  \n \nYou should understand that there is no right of privacy in connection with your use of \nthis system or in materials you may post on it or transmit through it.  \nAll interactions with this system are or may be monitored, and your access to the system\nis an act of express consent to such monitoring.  \nThe results of such monitoring may be used in civil or criminal actions as deemed appropriate.\nIf you are authorized to access this system, you have already agreed to monitoring of all \nactivity. \n\nInformation and information resources are valuable corporate assets. \nThey must be afforded levels of security commensurate with their sensitivity to \nprevent misuse, mishandling, and inappropriate disclosure. \nFailure to comply with security measures may result in disciplinary action, iVASuding \ndismissal and/or prosecution for malicious conduct."
+
+set system root-authentication encrypted-password "$1$c7bJxop9$PyAq1yiFoJc8XQt3Rsf4v/"
+set system login user Gtoo1 full-name "IGT Network Engineer Account"
+set system login user Gtoo1 uid 100
+set system login user Gtoo1 class super-user
+set system login user Gtoo1 authentication encrypted-password "$1$78JO.DNl$vOcjIxm8F6Ghb8nGhleP60"
+set system services ssh protocol-version v2
+
+set chassis alarm management-ethernet link-down ignore
+
+set routing-options static route 0.0.0.0/0 next-hop {{  data_global.default_gateway  }}
+
+
+{% for port in data_portmap %}
+set interfaces ge-{{  port.stack  }}/{{  port.portnumber  }} description "{{  port.description  }}"
+  
+  {% if port.mode == 'ACCESS' %}
+set interfaces ge-{{  port.stack  }}/{{  port.portnumber  }} unit 0 family ethernet-switching
+set vlans {{  port.assignment[0]  }} interface ge-{{  port.stack  }}/{{  port.portnumber  }}
+  {% endif %}
+  
+  {% if port.mode == 'TRUNK' %}
+set interfaces ge-{{  port.stack  }}/{{  port.portnumber  }} unit 0 family ethernet-switching port-mode trunk
+
+
+    {% for vlan in port.assignment %}
+set vlans {{  vlan  }} interface ge-{{  port.stack  }}/{{  port.portnumber  }}
+    {% endfor %}
+  {% endif %}
+  
+  {% if port.mode == 'LAG' %}
+delete interfaces ge{{  port.stack  }}/{{  port.portnumber  }} unit 0
+set interfaces ge{{  port.stack  }}/{{  port.portnumber  }} ether-options 802.3ad ae{{  port.assignment[0]  }}
+  {% endif %}
+  
+  
+  
+  
+{% endfor %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% for item in data_vlan %}
+set vlans {{  item.vlanname  }} description "{{  item.vlandescription  }}"
+set vlans {{  item.vlanname  }} vlan-id {{  item.vlanid  }}{% if item.vlanipaddress != '' %}
+set interfaces vlan unit {{  item.vlanid  }} description {{  item.vlanname  }}
+set interfaces vlan unit {{  item.vlanid  }} family inet address {{  item.vlanipaddress  }}
+set vlans {{  item.vlanname  }} l3-interface vlan.{{  item.vlanid  }}{%endif%}
+{% endfor %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% for item in data_lag %}
+
+set interface ae{{  item.lagnumber  }} aggregated-ether-options lacp active
+
+  {% for vlan in item.vlanname  %}
+set vlans {{  vlan  }} interface ae{{  item.lagnumber  }}
+  {%  endfor %}
+  
+  {% if item.portmode == 'ACCESS' %}
+set interface ae{{  item.lagnumber  }} unit 0 family ethernet-switching port-mode access
+  {% endif %}
+  
+  {% if item.portmode == 'TRUNK' %}
+set interface ae{{  item.lagnumber  }} unit 0 family ethernet-switching port-mode trunk
+  {% endif %}
+{% endfor %}

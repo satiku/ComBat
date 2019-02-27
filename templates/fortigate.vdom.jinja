@@ -1,0 +1,138 @@
+config firewall address  {% for item in data_addresses %}
+  edit "{{  item.addressname  }}"
+      set associated-interface "{{  item.addressinterface  }}"
+      set subnet {{  item.address  }}
+      set comment "{{  item.addresscomment  }}"
+  next  {% endfor %}
+end
+
+
+{# add network address objects  #}
+config firewall address  {% for item in data_networks %}
+  edit "{{  item.networkinterface  }}-LAN"
+      set associated-interface "{{  item.networkinterface  }}"
+      set subnet {{  item.network  }}
+      set comment "{{  item.comment  }}"
+  next  {% endfor %}
+end
+
+config firewall addrgrp
+{% for item in data_addresses %}
+  {% for group in item.addressgroup  %}
+    {% if group != "" %}
+    
+  edit {{  group  }}
+    append member  "{{  item.addressname  }}"
+    set comment "{{  item.addresscomment  }}"
+  next
+  
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+end
+
+config firewall service custom{% for item in data_services %}
+  edit "{{ item.servicename }}"
+    unset category
+  
+  {% if item.tcpports != "" %}
+    set tcp-portrange {{ item.tcpports }}
+  {% endif %}
+    
+  {%if item.udpports != "" %}
+    set upd-portrange {{ item.udpports }}
+    {% endif %}
+    set comment "{{  item.servicecomment  }}"
+  next{% endfor %}
+end
+
+config firewall service group
+{% for item in data_service_group %}
+    edit "{{  item.servicegroupname  }}"
+        append member{% for service_object in item.services %} {{  service_object  }}{%  endfor  %}
+    next
+{% endfor %}
+end
+
+
+config firewall vip {% for item in data_vip %}
+    edit "{{  item.vipname  }}"
+        set extip {{  item.extaddress  }}
+        set extintf "{{  item.interface  }}"
+        set mappedip "{{  item.intaddress  }}"
+        set comment "{{  item.comment  }}"
+    next {% endfor %}
+end
+
+
+config firewall vipgrp
+{% for item in data_vip %}
+  {% for group in item.vipgroup  %}
+    {% if group != "" %}
+    
+  edit {{  group  }}
+    set interface "{{  item.interface  }}"
+    append member  "{{  item.vipname  }}"
+    set comment "{{  item.vipcomment  }}"
+  next
+  
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+end
+
+
+
+config firewall ippool
+{% for item in data_ippool %}
+    edit {{  item.poolname  }}
+        set startip {{  item.startip  }}
+        set endip {{  item.endip}}
+    next {% endfor %}
+end
+
+
+
+
+
+
+
+
+config firewall policy{% for item in data_policy %}
+  edit {{ item.id }}
+      set srcintf {{  item.sourceinterface  }}
+      set dstintf {{  item.destinationinterface  }}
+      set srcaddr {{  item.sourceaddress  }}
+      set dstaddr {{  item.destinationaddress  }}
+      set action {{  item.action  }}
+      set schedule "always"
+      set service {{  item.service  }}
+      set comments {{  item.policycomment  }}
+      {%  if item.ips != ""  %}
+      set utm-status "{{  item.utm  }}"
+      set ips-sensor "{{  item.ips  }}"
+      set profile-protocol-options "{{  item.profile  }}"
+      {%  endif  %}
+      {% if item.nat == "enable" %}
+      set nat enable
+      {% if item.natpool != ""  %}
+      set ippool enable
+      set poolname "item.natpool"
+      {% endif %}
+      {% endif %}
+  next{% endfor %}
+end
+
+
+
+config router static
+{% for route in data_routes %}
+    edit 0
+        set dst {{  route.destination  }}
+        set gateway {{  route.gateway  }}
+        set device "{{ route.interface  }}"
+        set comment "{{  route.comment  }}"
+    next
+    
+{% endfor %}
+end

@@ -1,0 +1,73 @@
+hostname {{  data_global.hostname  }}
+ip name-server {{  data_global.name_server  }}
+
+ip routing
+no passwords min-length
+username "Gtoo1" password 58d036b9b7f0e7eb38cfb90f1cc70a73 privilege 15 encrypted
+username "admin" password 76a6aaa697fef2a1dd49622f4e7ef927 privilege 15 encrypted
+
+ip ssh server
+ip ssh protocol 2
+
+
+banner motd "\nThis system is privately owned and monitored; its use is restricted to unauthorized users.\nUnauthorized access is expressly prohibited and will be prosecuted.  \nAll information on this system should be considered to be the property of company owning \nthe system unless indicated to the contrary.\nYou are not allowed to access this system unless you are authorized to do so and have \nagreed to respect all rights of the company owning the system.  \n \nYou should understand that there is no right of privacy in connection with your use of \nthis system or in materials you may post on it or transmit through it.  \nAll interactions with this system are or may be monitored, and your access to the system\nis an act of express consent to such monitoring.  \nThe results of such monitoring may be used in civil or criminal actions as deemed appropriate.\nIf you are authorized to access this system, you have already agreed to monitoring of all \nactivity. \n\nInformation and information resources are valuable corporate assets. \nThey must be afforded levels of security commensurate with their sensitivity to \nprevent misuse, mishandling, and inappropriate disclosure. \nFailure to comply with security measures may result in disciplinary action, iVASuding \ndismissal and/or prosecution for malicious conduct."
+
+ip route 0.0.0.0 0.0.0.0 {{  data_global.default_gateway  }}
+
+!
+!    # Configure vlans and apply IP information as necessary
+!
+
+{% for item in data_vlan %}
+vlan {{  item.vlanid  }}
+name {{  item.vlanname  }}
+exit
+  {% if item.vlanipaddress != '' %}
+  
+interface vlan  {{  item.vlanid  }}
+ip address {{  item.vlanipaddress  }}
+exit
+
+  {%endif%}
+{% endfor %}
+
+
+!
+!    # Configure all port assignments
+!
+
+{% for port in data_portmap %}
+interface {{  data_global.port_prefix  }}{{  port.stack  }}/{{  port.portnumber  }}
+description "{{ port.description }}"
+
+  {% if port.mode == 'ACCESS' %}
+switchport access vlan {{  port.assignment_id[0]  }}
+  {% endif %}
+  
+  {% if port.mode == 'TRUNK' %}
+switchport mode trunk
+
+switchport trunk allowed vlan  {% for vlan in port.assignment_id %}{{  vlan  }},{% endfor %}
+  
+  {% endif %}
+  {% if port.mode == 'LAG' %}
+channel-group {{  port.assignment[0]  }} mode active
+  {% endif %}
+  
+  
+{% endfor %}
+
+
+!
+!    # Configure LAG assignments
+!
+
+{%  for lag in data_lag  %}
+
+interface port-channel {{  lag.lagnumber  }}
+switchport mode {{  lag.portmode  }}
+
+  
+switchport trunk allowed vlan {%  for vlan in lag.vlanid   %}{{  vlan  }},{%  endfor  %}
+
+{%  endfor   %}
