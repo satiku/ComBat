@@ -111,7 +111,7 @@ config firewall policy{% for item in data_policy %}
       {%  if item.ips != ""  %}
       set utm-status "{{  item.utm  }}"
       set ips-sensor "{{  item.ips  }}"
-      set profile-protocol-options "{{  item.profile  }}"
+      set ssl-ssh-profile  "{{  item.profile  }}"
       {%  endif  %}
       {% if item.nat == "enable" %}
       set nat enable
