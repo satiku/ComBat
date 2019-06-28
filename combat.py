@@ -8,6 +8,9 @@ import jinja2
 import xlrd
 import os
 import argparse
+import datetime
+import netmiko
+
 
 def PullWorkbook(PROJECT_DIR, device ):
     INPUT_FILE = PROJECT_DIR + "/" + device
@@ -155,6 +158,30 @@ if __name__ == '__main__':
         
         for device in project_workbook['MAKE'] :
             print('{:35}{:15}'.format(device['device'], device['ip']))
+        
+        
+
+            devices = {
+            'device_type': device['device_type'],
+            'ip': device['ip'],
+            'username': device['username'],
+            'password': device['password'],
+            }
+            
+            print(devices)
+            net_connect = netmiko.ConnectHandler(**devices)
+            output = net_connect.send_command_timing('config vdom', delay_factor=4)
+
+            output = net_connect.send_command_timing('edit ' + device['vslice'] , delay_factor=4)
+        
+            output = net_connect.send_command('show ')
+        
+        
+            Pull_FILE  = PROJECT_DIR + "/PULL/" + device['device'] + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S") + ".txt"
+            WriteConfig(output , Pull_FILE)
+        
+        
+        
         
         
         
