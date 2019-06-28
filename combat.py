@@ -170,13 +170,15 @@ if __name__ == '__main__':
             
             print(devices)
             net_connect = netmiko.ConnectHandler(**devices)
-            output = net_connect.send_command_timing('config vdom', delay_factor=4)
-
-            output = net_connect.send_command_timing('edit ' + device['vslice'] , delay_factor=4)
-        
-            output = net_connect.send_command('show ')
-        
-        
+            
+            
+            
+            if device['device_type'] == "fortinet" :
+                output = net_connect.send_command_timing('config vdom', delay_factor=4)
+                output = net_connect.send_command_timing('edit ' + device['vslice'] , delay_factor=4)
+                output = net_connect.send_command('show ')
+            
+            
             Pull_FILE  = PROJECT_DIR + "/PULL/" + device['device'] + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S") + ".txt"
             WriteConfig(output , Pull_FILE)
         
