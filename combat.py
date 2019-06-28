@@ -73,9 +73,10 @@ def PullSheetVars(sheet):
     
 def LoadTemplate(device) :
     # jinja template object
-    templateLoader = jinja2.FileSystemLoader( searchpath='templates')
-    templateEnv = jinja2.Environment( loader=templateLoader )
+    template_dir =r'C:\Users\ZCONINGFORD\Documents\Projects\ComBat\templates'
     
+    templateLoader = jinja2.FileSystemLoader( searchpath=template_dir)
+    templateEnv = jinja2.Environment( loader=templateLoader )
     # load template
     # print(device),
     TEMPLATE = device
@@ -139,3 +140,5 @@ if __name__ == '__main__':
             
             CONFIG_FILE  = PROJECT_DIRS + PROJECT + "/MAKE/" + device['device'] + ".txt"
             WriteConfig(Snip , CONFIG_FILE)
+        
+#        wait = input("PRESS ENTER TO CONTINUE.")
