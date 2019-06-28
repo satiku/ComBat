@@ -104,6 +104,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='make some configs.')
     parser.add_argument('path', nargs=1, help='dir of the main.xlsx file')
     parser.add_argument('--make', action='store_true', default=False,  help='make conifg')
+    
+    parser.add_argument('--pull', action='store_true', default=False,  help='pull running conifg')
+    
+    
 
     args = parser.parse_args()
 #    PROJECT = str(args.path[0])
@@ -144,5 +148,17 @@ if __name__ == '__main__':
             
             CONFIG_FILE  = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
             WriteConfig(Snip , CONFIG_FILE)
+        
+    if args.pull == True :
+        print('{:35}{:15}'.format("device name", "IP"))
+        print("+--------------------------------------------------------------+")
+        
+        for device in project_workbook['MAKE'] :
+            print('{:35}{:15}'.format(device['device'], device['ip']))
+        
+        
+        
+        
+        
         
         wait = input("PRESS ENTER TO CONTINUE.")
