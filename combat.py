@@ -8,6 +8,9 @@ import jinja2
 import xlrd
 import os
 import argparse
+import datetime
+import netmiko
+
 
 import netmiko
 
@@ -106,6 +109,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='make some configs.')
     parser.add_argument('path', nargs=1, help='dir of the main.xlsx file')
     parser.add_argument('--make', action='store_true', default=False,  help='make conifg')
+    
+    parser.add_argument('--pull', action='store_true', default=False,  help='pull running conifg')
+    
+    
 
     parser.add_argument('--push', action='store_true', default=False,  help='push conifg')
     
@@ -148,6 +155,44 @@ if __name__ == '__main__':
             
             CONFIG_FILE  = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
             WriteConfig(Snip , CONFIG_FILE)
+        
+    if args.pull == True :
+        print('{:35}{:15}'.format("device name", "IP"))
+        print("+--------------------------------------------------------------+")
+        
+        for device in project_workbook['MAKE'] :
+            print('{:35}{:15}'.format(device['device'], device['ip']))
+        
+        
+
+            devices = {
+            'device_type': device['device_type'],
+            'ip': device['ip'],
+            'username': device['username'],
+            'password': device['password'],
+            }
+            
+            print(devices)
+            net_connect = netmiko.ConnectHandler(**devices)
+            
+            
+            
+            if device['device_type'] == "fortinet" :
+                output = net_connect.send_command_timing('config vdom', delay_factor=4)
+                output = net_connect.send_command_timing('edit ' + device['vslice'] , delay_factor=4)
+                output = net_connect.send_command('show ')
+            
+            
+            Pull_FILE  = PROJECT_DIR + "/PULL/" + device['device'] + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S") + ".txt"
+            WriteConfig(output , Pull_FILE)
+        
+        
+        
+        
+        
+        
+        
+        
         
         wait = input("PRESS ENTER TO CONTINUE.")
 
