@@ -9,6 +9,8 @@ import xlrd
 import os
 import argparse
 
+import netmiko
+
 def PullWorkbook(PROJECT_DIR, device ):
     INPUT_FILE = PROJECT_DIR + "/" + device
 
@@ -105,6 +107,8 @@ if __name__ == '__main__':
     parser.add_argument('path', nargs=1, help='dir of the main.xlsx file')
     parser.add_argument('--make', action='store_true', default=False,  help='make conifg')
 
+    parser.add_argument('--push', action='store_true', default=False,  help='push conifg')
+    
     args = parser.parse_args()
 #    PROJECT = str(args.path[0])
     PROJECT_DIR = str(args.path[0])
@@ -146,3 +150,53 @@ if __name__ == '__main__':
             WriteConfig(Snip , CONFIG_FILE)
         
         wait = input("PRESS ENTER TO CONTINUE.")
+
+
+
+
+
+
+
+
+
+        
+    if args.push == True :
+        print('{:35}{:15}'.format("device name", "IP"))
+        print("+--------------------------------------------------------------+")
+        
+        for device in project_workbook['MAKE'] :
+            print('{:35}{:15}'.format(device['device'], device['ip']))
+        
+        
+
+            devices = {
+            'device_type': device['device_type'],
+            'ip': device['ip'],
+            'username': device['username'],
+            'password': device['password'],
+            }
+            
+            CONFIG_FILE  = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
+            
+            print(devices)
+            net_connect = netmiko.ConnectHandler(**devices)
+            
+            
+            
+            if device['device_type'] == "fortinet" :
+                output = net_connect.send_command_timing('config vdom', delay_factor=4)
+                output = net_connect.send_command_timing('edit ' + device['vslice'] , delay_factor=4)
+                
+                            
+                print(net_connect.find_prompt())
+                output = net_connect.send_config_from_file(CONFIG_FILE)
+                print(output)
+                        
+
+        
+                PUSH_LOG_FILE  = PROJECT_DIR + "/PUSH/" + device['device'] + ".txt"
+                WriteConfig(output , PUSH_LOG_FILE )
+            
+            
+            
+        
