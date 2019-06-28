@@ -12,8 +12,6 @@ import datetime
 import netmiko
 
 
-import netmiko
-
 def PullWorkbook(PROJECT_DIR, device ):
     INPUT_FILE = PROJECT_DIR + "/" + device
 
@@ -187,21 +185,10 @@ if __name__ == '__main__':
             WriteConfig(output , Pull_FILE)
         
         
-        
-        
-        
-        
-        
+
         
         
         wait = input("PRESS ENTER TO CONTINUE.")
-
-
-
-
-
-
-
 
 
         
