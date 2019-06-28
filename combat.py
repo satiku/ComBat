@@ -9,10 +9,12 @@ import xlrd
 import os
 import argparse
 
-def PullWorkbook(site_name,PROJECT_DIRS, device ):
-    INPUT_FILE = PROJECT_DIRS + site_name + "/" + device
-        
+def PullWorkbook(PROJECT_DIR, device ):
+    INPUT_FILE = PROJECT_DIR + "/" + device
+
+
     workbook = xlrd.open_workbook(INPUT_FILE)
+
     
     return workbook
 
@@ -97,17 +99,18 @@ def WriteConfig(snip, config_file):
     
 if __name__ == '__main__':
     
-    PROJECT_DIRS = os.path.expanduser('~') + "/Documents/Projects/"
+#    PROJECT_DIRS = os.path.expanduser('~') + "/Documents/Projects/"
 
     parser = argparse.ArgumentParser(description='make some configs.')
     parser.add_argument('path', nargs=1, help='dir of the main.xlsx file')
     parser.add_argument('--make', action='store_true', default=False,  help='make conifg')
 
     args = parser.parse_args()
-    PROJECT = str(args.path[0])
+#    PROJECT = str(args.path[0])
+    PROJECT_DIR = str(args.path[0])
     project_workbook = {}
-    
-    PROJECT_WORKBOOK = PullWorkbook(PROJECT, PROJECT_DIRS, "main.xlsx" )
+
+    PROJECT_WORKBOOK = PullWorkbook(PROJECT_DIR, "main.xlsx" )
     for sheet in PROJECT_WORKBOOK.sheet_names() :
         project_workbook[sheet] = PullSheetVars(PROJECT_WORKBOOK.sheet_by_name(sheet))
     project_workbook['data_global'] = PullGlobalVars(PROJECT_WORKBOOK.sheet_by_name('data_global'))
@@ -117,8 +120,9 @@ if __name__ == '__main__':
         print('{:15}{:25}{:25}'.format("device name", "template fille", "input file"))
         print("+--------------------------------------------------------------+")
         for device in project_workbook['MAKE'] :
-        
-            device_workbook = PullWorkbook(PROJECT, PROJECT_DIRS, "INPUT/" + device['data_file'] )
+
+            #print(PROJECT_DIR, "/INPUT/" + device['data_file'])
+            device_workbook = PullWorkbook(PROJECT_DIR, "INPUT/" + device['data_file'] )
             sheet_vars = {}
             
             # extract data from workbook
@@ -138,7 +142,7 @@ if __name__ == '__main__':
             template = LoadTemplate( device['template_file'] )
             Snip = template.render(**sheet_vars)
             
-            CONFIG_FILE  = PROJECT_DIRS + PROJECT + "/MAKE/" + device['device'] + ".txt"
+            CONFIG_FILE  = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
             WriteConfig(Snip , CONFIG_FILE)
         
-#        wait = input("PRESS ENTER TO CONTINUE.")
+        wait = input("PRESS ENTER TO CONTINUE.")
