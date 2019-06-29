@@ -210,7 +210,9 @@ if __name__ == '__main__':
             
             CONFIG_FILE  = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
             
-            print(devices)
+            # confirm
+            wait = input("YOU ARE ABOUT TO PUSH CHANGES !!! PRESS ENTER TO CONTINUE.")
+            
             net_connect = netmiko.ConnectHandler(**devices)
             
             
