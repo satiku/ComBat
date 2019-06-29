@@ -228,7 +228,7 @@ if __name__ == '__main__':
                         
 
         
-                PUSH_LOG_FILE  = PROJECT_DIR + "/PUSH/" + device['device'] + ".txt"
+                PUSH_LOG_FILE  = PROJECT_DIR + "/PUSH/" + device['device'] + datetime.datetime.now().strftime(" %Y-%m-%d %H.%M.%S") + ".txt"
                 WriteConfig(output , PUSH_LOG_FILE )
             
             
