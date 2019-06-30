@@ -170,7 +170,6 @@ if __name__ == '__main__':
             'password': device['password'],
             }
             
-            print(devices)
             net_connect = netmiko.ConnectHandler(**devices)
             
             
