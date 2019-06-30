@@ -119,7 +119,7 @@ if __name__ == '__main__':
     PROJECT_DIR = str(args.path[0])
     project_workbook = {}
 
-    PROJECT_WORKBOOK = PullWorkbook(PROJECT_DIR, "main.xlsx" )
+    PROJECT_WORKBOOK = PullWorkbook(PROJECT_DIR, "main.xlsm" )
     for sheet in PROJECT_WORKBOOK.sheet_names() :
         project_workbook[sheet] = PullSheetVars(PROJECT_WORKBOOK.sheet_by_name(sheet))
     project_workbook['data_global'] = PullGlobalVars(PROJECT_WORKBOOK.sheet_by_name('data_global'))
