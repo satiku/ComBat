@@ -172,13 +172,17 @@ if __name__ == '__main__':
             
             net_connect = netmiko.ConnectHandler(**devices)
             
-            
-            
+                
+
             if device['device_type'] == "fortinet" :
                 output = net_connect.send_command_timing('config vdom', delay_factor=4)
                 output = net_connect.send_command_timing('edit ' + device['vslice'] , delay_factor=4)
                 output = net_connect.send_command('show ')
             
+            
+            elif device['device_type'] == "cisco_nxos" :
+                output = net_connect.send_command("show run")
+
             
             Pull_FILE  = PROJECT_DIR + "/PULL/" + device['device'] + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S") + ".txt"
             WriteConfig(output , Pull_FILE)
