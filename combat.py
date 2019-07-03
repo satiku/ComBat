@@ -265,10 +265,8 @@ if __name__ == '__main__':
                 output = output.split('\n')
                 
                 for line in output :
-                    print("line")
                     
                     if "Serial-Number:" in line or "Hostname:" in line or "Version:" in line :
-                        print(line)
                         final += line + '\n'
                         
                 net_connect.send_command_timing('end', delay_factor=4)
@@ -277,10 +275,8 @@ if __name__ == '__main__':
                 output = output.split('\n')
                                 
                 for line in output :
-                    print("line")
                     
-                    if "Master :" in line or "Slave  :" in line  :
-                        print(line)
+                    if "Master:" in line or "Slave :" in line  :
                         final += line + '\n'
 
     
