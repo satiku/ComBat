@@ -113,6 +113,8 @@ if __name__ == '__main__':
     
 
     parser.add_argument('--push', action='store_true', default=False,  help='push conifg')
+    parser.add_argument('--gather', action='store_true', default=False,  help='gather')
+    
     
     args = parser.parse_args()
 #    PROJECT = str(args.path[0])
@@ -230,4 +232,63 @@ if __name__ == '__main__':
             
             
             
+            
+    if args.gather == True :
+        print('{:35}{:15}'.format("device name", "IP"))
+        print("+--------------------------------------------------------------+")
+        
+        for device in project_workbook['MAKE'] :
+            print('{:35}{:15}'.format(device['device'], device['ip']))
+        
+        
+
+            devices = {
+            'device_type': device['device_type'],
+            'ip': device['ip'],
+            'username': device['username'],
+            'password': device['password'],
+            }
+            
+            net_connect = netmiko.ConnectHandler(**devices)
+            
+            
+            
+            if device['device_type'] == "fortinet" :
+                net_connect.send_command_timing('config vdom', delay_factor=4)
+                net_connect.send_command_timing('edit ' + device['vslice'] , delay_factor=4)
+                
+                output = net_connect.send_command('fnsysctl more  /etc/upd.dat')
+                final = output.split("|")[0] + '\n'
+
+
+                output = net_connect.send_command('get system status')
+                output = output.split('\n')
+                
+                for line in output :
+                    print("line")
+                    
+                    if "Serial-Number:" in line or "Hostname:" in line or "Version:" in line :
+                        print(line)
+                        final += line + '\n'
+                        
+                net_connect.send_command_timing('end', delay_factor=4)
+                net_connect.send_command_timing('config global', delay_factor=4)
+                output = net_connect.send_command('get system ha status')
+                output = output.split('\n')
+                                
+                for line in output :
+                    print("line")
+                    
+                    if "Master :" in line or "Slave  :" in line  :
+                        print(line)
+                        final += line + '\n'
+
+    
+            Gather_FILE  = PROJECT_DIR + "/GATHER/" +  datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
+            WriteConfig(final , Gather_FILE)
+        
+        
+
+
+
         
