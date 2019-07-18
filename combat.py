@@ -186,7 +186,7 @@ if __name__ == '__main__':
                 output = net_connect.send_command("show run")
 
             
-            Pull_FILE  = PROJECT_DIR + "/PULL/" + device['device'] + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S") + ".txt"
+            Pull_FILE  = PROJECT_DIR + "/PULL/" + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
             WriteConfig(output , Pull_FILE)
         
         
@@ -231,7 +231,7 @@ if __name__ == '__main__':
                         
 
         
-                PUSH_LOG_FILE  = PROJECT_DIR + "/PUSH/" + device['device'] + datetime.datetime.now().strftime(" %Y-%m-%d %H.%M.%S") + ".txt"
+                PUSH_LOG_FILE  = PROJECT_DIR + "/PUSH/" + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
                 WriteConfig(output , PUSH_LOG_FILE )
             
             
