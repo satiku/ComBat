@@ -1,0 +1,94 @@
+
+
+
+
+
+
+
+
+{% for item in data_vlan %}
+vlan {{  item.vlanid  }}
+name {{  item.vlanname  }}
+
+end
+{% endfor %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% for item in data_lag %}
+
+interface port-channel{{  item.lagnumber  }}
+
+
+  {% if item.portmode == 'ACCESS' %}
+  switchport access vlan item.vlanname[0]
+  {% endif %}
+  
+  {% if item.portmode == 'TRUNK' %}
+  switchport mode trunk
+  switchport trunk allowed  vlan  {% for vlan in item.vlanname  %} {{  vlan  }}   {%  endfor %}
+  {% endif %}
+  end
+  
+{% endfor %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% for port in data_portmap %}
+
+Ethernet {{  port.stack  }}/{{  port.portnumber  }}
+ description "{{  port.description  }}"
+  
+  {% if port.mode == 'ACCESS' %}
+  
+  no shut
+  switchport access {{  port.assignment_id[0]  }}
+  
+  {% endif %}
+  
+  {% if port.mode == 'TRUNK' %}
+  
+  no shut
+  switchport trunk
+  switchport trunk allowed vlan     {% for vlan in port.assignment_id %} {{  vlan  }} {% endfor %}
+  {% endif %}
+  
+  {% if port.mode == 'LAG' %}
+  
+  no shut
+  channel-group {{  port.assignment[0]  }} mode active
+  
+  {% endif %}
+  
+  
+  
+  end
+{% endfor %}
