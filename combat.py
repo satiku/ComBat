@@ -1,14 +1,15 @@
-# ComBat:Module
-#
-# maintainer          : Zachary Hudson
-# maintainer-email    : zachudson92@gmail.com
-# required modules    : jinja2 , xlrd
+"""
+ ComBat:Module
+ maintainer          : Zachary Hudson
+ maintainer-email    : zachudson92@gmail.com
+ required modules    : os, argparse, datetime, jinja2, xlrd, netmiko
+"""
 
-import jinja2
-import xlrd
 import os
 import argparse
 import datetime
+import jinja2
+import xlrd
 import netmiko
 
 
