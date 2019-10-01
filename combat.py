@@ -26,7 +26,7 @@ def pull_global_vars(global_vars_sheet):
 
     global_vars = {}
 
-    for row in range(sheet.nrows):
+    for row in range(global_vars_sheet.nrows):
         rowvals = global_vars_sheet.row_values(row)
         global_vars[rowvals[0]] = str(rowvals[1])
     return global_vars
