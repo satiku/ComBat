@@ -13,24 +13,23 @@ import xlrd
 import netmiko
 
 
-def PullWorkbook(PROJECT_DIR, device ):
-    INPUT_FILE = PROJECT_DIR + "/" + device
+def pull_workbook(project_dir, file):
+    """Module to pull excel workbook"""
 
+    input_file = project_dir + "/" + file
+    workbook = xlrd.open_workbook(input_file)
 
-    workbook = xlrd.open_workbook(INPUT_FILE)
-
-    
     return workbook
 
-def PullGlobalVars(sheet):
-    # extract globalVars from workbook sheet
-    
-    globalVars = {}
+def pull_global_vars(global_vars_sheet):
+    """Extract global_vars from workbook sheet. A list of non-iterative settings"""
+
+    global_vars = {}
 
     for row in range(sheet.nrows):
-        rowvals = sheet.row_values(row)
-        globalVars[rowvals[0]] = str(rowvals[1])
-    return globalVars
+        rowvals = global_vars_sheet.row_values(row)
+        global_vars[rowvals[0]] = str(rowvals[1])
+    return global_vars
 
 def PullSheetVars(sheet):
     sheetVars = []
@@ -122,10 +121,10 @@ if __name__ == '__main__':
     PROJECT_DIR = str(args.path[0])
     project_workbook = {}
 
-    PROJECT_WORKBOOK = PullWorkbook(PROJECT_DIR, "main.xlsm" )
+    PROJECT_WORKBOOK = pull_workbook(PROJECT_DIR, "main.xlsm" )
     for sheet in PROJECT_WORKBOOK.sheet_names() :
         project_workbook[sheet] = PullSheetVars(PROJECT_WORKBOOK.sheet_by_name(sheet))
-    project_workbook['data_global'] = PullGlobalVars(PROJECT_WORKBOOK.sheet_by_name('data_global'))
+    project_workbook['data_global'] = pull_global_vars(PROJECT_WORKBOOK.sheet_by_name('data_global'))
 
     
     if args.make == True :
@@ -134,7 +133,7 @@ if __name__ == '__main__':
         for device in project_workbook['MAKE'] :
 
             #print(PROJECT_DIR, "/INPUT/" + device['data_file'])
-            device_workbook = PullWorkbook(PROJECT_DIR, "INPUT/" + device['data_file'] )
+            device_workbook = pull_workbook(PROJECT_DIR, "INPUT/" + device['data_file'] )
             sheet_vars = {}
             
             # extract data from workbook
@@ -143,7 +142,7 @@ if __name__ == '__main__':
             #set global vars
             
             
-            sheet_vars['data_global'] = PullGlobalVars(device_workbook.sheet_by_name('data_global'))
+            sheet_vars['data_global'] = pull_global_vars(device_workbook.sheet_by_name('data_global'))
             
             sheet_vars['data_global']['site_prefix'] = project_workbook['data_global']['site_prefix']
             
