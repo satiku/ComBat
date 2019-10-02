@@ -70,8 +70,8 @@ def pull_sheet_vars(arg_sheet):
                     new_dictionary[var_index_list[i]] = var
 
                 elif var_type_list[i] == 'SPACE_DELIMITED':
-                    
-                    if type(var) == float:
+
+                    if isinstance(var, float):
                         var_list = [int(var)]
                         new_dictionary[var_index_list[i]] = var_list
 
