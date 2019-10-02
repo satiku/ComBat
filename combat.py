@@ -5,6 +5,7 @@
  required modules   : os, argparse, datetime, jinja2, xlrd, netmiko
 """
 
+#lines longer than 80 characters
 # pylint: disable=C0301
 
 import os
