@@ -70,13 +70,7 @@ def pull_sheet_vars(arg_sheet):
                     new_dictionary[var_index_list[i]] = var
 
                 elif var_type_list[i] == 'SPACE_DELIMITED':
-
-                    if isinstance(var, float):
-                        var_list = [int(var)]
-                        new_dictionary[var_index_list[i]] = var_list
-
-                    else:
-                        new_dictionary[var_index_list[i]] = str(var).split(' ')
+                    new_dictionary[var_index_list[i]] = [int(var)] if isinstance(var, float) else str(var).split(' ') ## number check otherwise split strings
 
             return_sheet_vars.append(new_dictionary)
 
@@ -142,27 +136,23 @@ if __name__ == '__main__':
         print('{:15}{:25}{:25}'.format("device name", "template fille", "input file"))
         print("+--------------------------------------------------------------+")
         for device in project_workbook['MAKE']:
+            device['workbook_data'] = {}
 
-            #print(PROJECT_DIR, "/INPUT/" + device['data_file'])
+            #path to device workbook
             device_workbook = pull_workbook(PROJECT_DIR, "INPUT/" + device['data_file'])
-            sheet_vars = {}
 
             # extract data from workbook
             for sheet in device_workbook.sheet_names():
-                sheet_vars[sheet] = pull_sheet_vars(device_workbook.sheet_by_name(sheet))
+                device['workbook_data'][sheet] = pull_sheet_vars(device_workbook.sheet_by_name(sheet))
+
             #set global vars
-
-
-            sheet_vars['data_global'] = pull_global_vars(device_workbook.sheet_by_name('data_global'))
-
-            sheet_vars['data_global']['site_prefix'] = project_workbook['data_global']['site_prefix']
-
-            device['workbook_data'] = sheet_vars
+            device['workbook_data']['data_global'] = pull_global_vars(device_workbook.sheet_by_name('data_global'))
+            device['workbook_data']['data_global']['site_prefix'] = project_workbook['data_global']['site_prefix']
 
             print('{:15}{:25}{:25}'.format(device['device'], device['template_file'], device['data_file']))
 
             template = load_template(device['template_file'])
-            Snip = template.render(**sheet_vars)
+            Snip = template.render(**device['workbook_data'])
 
             CONFIG_FILE = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
             write_config(Snip, CONFIG_FILE)
@@ -173,7 +163,6 @@ if __name__ == '__main__':
 
         for device in project_workbook['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
-
 
 
             devices = {
@@ -192,8 +181,8 @@ if __name__ == '__main__':
                 output = net_connect.send_command('show ')
 
                 ## add chop pass
-                
-                
+
+
 
 
 
