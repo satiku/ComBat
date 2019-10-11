@@ -107,9 +107,7 @@ def write_config(snip, config_file):
 
 if __name__ == '__main__':
 
-#    PROJECT_DIRS = os.path.expanduser('~') + "/Documents/Projects/"
-
-    parser = argparse.ArgumentParser(description='make some configs.')  # pylint: disable=C0103
+    parser = argparse.ArgumentParser(description='lets do some stuff.')  # pylint: disable=C0103
 
     parser.add_argument('path', nargs=1, help='dir of the main.xlsx file')
 
@@ -120,11 +118,11 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()  # pylint: disable=C0103
+
     PROJECT_DIR = str(args.path[0])
 
-    PROJECT_WORKBOOK_DICT = {}   # pylint: disable=C0103
-
     PROJECT_WORKBOOK_OBJ = pull_workbook(PROJECT_DIR, "main.xlsm")
+    PROJECT_WORKBOOK_DICT = {}
 
     for sheet in PROJECT_WORKBOOK_OBJ.sheet_names():
         PROJECT_WORKBOOK_DICT[sheet] = pull_sheet_vars(PROJECT_WORKBOOK_OBJ.sheet_by_name(sheet))
@@ -147,7 +145,6 @@ if __name__ == '__main__':
 
             #set global vars
             device['workbook_data']['data_global'] = pull_global_vars(device_workbook.sheet_by_name('data_global'))
-            device['workbook_data']['data_global']['site_prefix'] = PROJECT_WORKBOOK_DICT['data_global']['site_prefix']
 
             print('{:15}{:25}{:25}'.format(device['device'], device['template_file'], device['data_file']))
 
@@ -156,6 +153,7 @@ if __name__ == '__main__':
 
             CONFIG_FILE = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
             write_config(Snip, CONFIG_FILE)
+
 
     if args.pull:
         print('{:35}{:15}'.format("device name", "IP"))
