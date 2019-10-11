@@ -5,6 +5,7 @@
  required modules   : os, argparse, datetime, jinja2, xlrd, xlwt, netmiko
 """
 
+#lines longer than 80 characters
 # pylint: disable=C0301
 
 import os
@@ -64,15 +65,14 @@ def pull_sheet_vars(arg_sheet):
                     try:
                         new_dictionary[var_index_list[i]] = int(var)
                     except:
-                        var = str(var)
-                        new_dictionary[var_index_list[i]] = var.strip()
+                        new_dictionary[var_index_list[i]] = str(var).strip()
 
                 elif var_type_list[i] == 'BOOLEAN':
                     new_dictionary[var_index_list[i]] = var
 
                 elif var_type_list[i] == 'SPACE_DELIMITED':
-                    
-                    if type(var) == float:
+
+                    if isinstance(var, float):
                         var_list = [int(var)]
                         new_dictionary[var_index_list[i]] = var_list
 
@@ -337,6 +337,11 @@ if __name__ == '__main__':
                 output = net_connect.send_command_timing('config vdom', delay_factor=4)
                 output = net_connect.send_command_timing('edit ' + device['vslice'], delay_factor=4)
                 output = net_connect.send_command('show ')
+
+                ## add chop pass
+                
+                
+
 
 
             elif device['device_type'] == "cisco_nxos":
