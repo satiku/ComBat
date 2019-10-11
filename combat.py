@@ -122,20 +122,20 @@ if __name__ == '__main__':
     args = parser.parse_args()  # pylint: disable=C0103
     PROJECT_DIR = str(args.path[0])
 
-    project_workbook = {}   # pylint: disable=C0103
+    PROJECT_WORKBOOK_DICT = {}   # pylint: disable=C0103
 
-    PROJECT_WORKBOOK = pull_workbook(PROJECT_DIR, "main.xlsm")
+    PROJECT_WORKBOOK_OBJ = pull_workbook(PROJECT_DIR, "main.xlsm")
 
-    for sheet in PROJECT_WORKBOOK.sheet_names():
-        project_workbook[sheet] = pull_sheet_vars(PROJECT_WORKBOOK.sheet_by_name(sheet))
+    for sheet in PROJECT_WORKBOOK_OBJ.sheet_names():
+        PROJECT_WORKBOOK_DICT[sheet] = pull_sheet_vars(PROJECT_WORKBOOK_OBJ.sheet_by_name(sheet))
 
-    project_workbook['data_global'] = pull_global_vars(PROJECT_WORKBOOK.sheet_by_name('data_global'))
+    PROJECT_WORKBOOK_DICT['data_global'] = pull_global_vars(PROJECT_WORKBOOK_OBJ.sheet_by_name('data_global'))
 
 
     if args.make:
         print('{:15}{:25}{:25}'.format("device name", "template fille", "input file"))
         print("+--------------------------------------------------------------+")
-        for device in project_workbook['MAKE']:
+        for device in PROJECT_WORKBOOK_DICT['MAKE']:
             device['workbook_data'] = {}
 
             #path to device workbook
@@ -147,7 +147,7 @@ if __name__ == '__main__':
 
             #set global vars
             device['workbook_data']['data_global'] = pull_global_vars(device_workbook.sheet_by_name('data_global'))
-            device['workbook_data']['data_global']['site_prefix'] = project_workbook['data_global']['site_prefix']
+            device['workbook_data']['data_global']['site_prefix'] = PROJECT_WORKBOOK_DICT['data_global']['site_prefix']
 
             print('{:15}{:25}{:25}'.format(device['device'], device['template_file'], device['data_file']))
 
@@ -161,7 +161,7 @@ if __name__ == '__main__':
         print('{:35}{:15}'.format("device name", "IP"))
         print("+--------------------------------------------------------------+")
 
-        for device in project_workbook['MAKE']:
+        for device in PROJECT_WORKBOOK_DICT['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
 
             devices = {
@@ -188,7 +188,7 @@ if __name__ == '__main__':
         print('{:35}{:15}'.format("device name", "IP"))
         print("+--------------------------------------------------------------+")
 
-        for device in project_workbook['MAKE']:
+        for device in PROJECT_WORKBOOK_DICT['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
 
             devices = {
@@ -220,7 +220,7 @@ if __name__ == '__main__':
         print('{:35}{:15}'.format("device name", "IP"))
         print("+--------------------------------------------------------------+")
 
-        for device in project_workbook['MAKE']:
+        for device in PROJECT_WORKBOOK_DICT['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
 
             devices = {
