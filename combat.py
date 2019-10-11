@@ -164,7 +164,6 @@ if __name__ == '__main__':
         for device in project_workbook['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
 
-
             devices = {
                 'device_type': device['device_type'],
                 'ip': device['ip'],
@@ -174,30 +173,16 @@ if __name__ == '__main__':
 
             net_connect = netmiko.ConnectHandler(**devices)
 
-
             if device['device_type'] == "fortinet":
                 output = net_connect.send_command_timing('config vdom', delay_factor=4)
                 output = net_connect.send_command_timing('edit ' + device['vslice'], delay_factor=4)
                 output = net_connect.send_command('show ')
 
-                ## add chop pass
-
-
-
-
-
             elif device['device_type'] == "cisco_nxos":
                 output = net_connect.send_command("show run")
 
-
             Pull_FILE = PROJECT_DIR + "/PULL/" + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
             write_config(output, Pull_FILE)
-
-
-
-
-
-
 
     if args.push:
         print('{:35}{:15}'.format("device name", "IP"))
@@ -205,8 +190,6 @@ if __name__ == '__main__':
 
         for device in project_workbook['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
-
-
 
             devices = {
                 'device_type': device['device_type'],
@@ -222,24 +205,16 @@ if __name__ == '__main__':
 
             net_connect = netmiko.ConnectHandler(**devices)
 
-
-
             if device['device_type'] == "fortinet":
                 output = net_connect.send_command_timing('config vdom', delay_factor=4)
                 output = net_connect.send_command_timing('edit ' + device['vslice'], delay_factor=4)
-
 
                 print(net_connect.find_prompt())
                 output = net_connect.send_config_from_file(CONFIG_FILE)
                 print(output)
 
-
-
                 PUSH_LOG_FILE = PROJECT_DIR + "/PUSH/" + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
                 write_config(output, PUSH_LOG_FILE)
-
-
-
 
     if args.gather:
         print('{:35}{:15}'.format("device name", "IP"))
@@ -247,8 +222,6 @@ if __name__ == '__main__':
 
         for device in project_workbook['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
-
-
 
             devices = {
                 'device_type': device['device_type'],
@@ -259,15 +232,12 @@ if __name__ == '__main__':
 
             net_connect = netmiko.ConnectHandler(**devices)
 
-
-
             if device['device_type'] == "fortinet":
                 net_connect.send_command_timing('config vdom', delay_factor=4)
                 net_connect.send_command_timing('edit ' + device['vslice'], delay_factor=4)
 
                 output = net_connect.send_command('fnsysctl more  /etc/upd.dat')
                 final = output.split("|")[0] + '\n'
-
 
                 output = net_connect.send_command('get system status')
                 output = output.split('\n')
