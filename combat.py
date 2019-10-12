@@ -168,11 +168,11 @@ if __name__ == '__main__':
             write_config(Snip, CONFIG_FILE)
 
     if args.pull:
-        print('{:35}{:15}'.format("device name", "IP"))
-        print("+--------------------------------------------------------------+")
+        print('{:35}{:15}'.format("device name", "IP"), flush=True)
+        print("+--------------------------------------------------------------+", flush=True)
 
         for device in project_workbook['MAKE']:
-            DEVICE_START_TIME =  datetime.datetime.now()
+            DEVICE_START_TIME = datetime.datetime.now()
 
 
 
@@ -305,4 +305,4 @@ if __name__ == '__main__':
 
 
 
-    print('Total Execution Time : ' + str(datetime.datetime.now() - START_TIME))
+    print('Total Execution Time :                            {}'.format(str(datetime.datetime.now() - START_TIME)))
