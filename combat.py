@@ -70,7 +70,13 @@ def pull_sheet_vars(arg_sheet):
                     new_dictionary[var_index_list[i]] = var
 
                 elif var_type_list[i] == 'SPACE_DELIMITED':
-                    new_dictionary[var_index_list[i]] = [int(var)] if isinstance(var, float) else str(var).split(' ') ## number check otherwise split strings
+
+                    if isinstance(var, float):
+                        var_list = [int(var)]
+                        new_dictionary[var_index_list[i]] = var_list
+
+                    else:
+                        new_dictionary[var_index_list[i]] = str(var).split(' ')
 
             return_sheet_vars.append(new_dictionary)
 
@@ -107,7 +113,9 @@ def write_config(snip, config_file):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='lets do some stuff.')  # pylint: disable=C0103
+#    PROJECT_DIRS = os.path.expanduser('~') + "/Documents/Projects/"
+
+    parser = argparse.ArgumentParser(description='make some configs.')  # pylint: disable=C0103
 
     parser.add_argument('path', nargs=1, help='dir of the main.xlsx file')
 
@@ -116,48 +124,57 @@ if __name__ == '__main__':
     parser.add_argument('--push', action='store_true', default=False, help='push conifg')
     parser.add_argument('--gather', action='store_true', default=False, help='gather')
 
+
     args = parser.parse_args()  # pylint: disable=C0103
-
     PROJECT_DIR = str(args.path[0])
-    PROJECT_WORKBOOK_OBJ = pull_workbook(PROJECT_DIR, "main.xlsm")
-    PROJECT_WORKBOOK_DICT = {}
 
-    for sheet in PROJECT_WORKBOOK_OBJ.sheet_names():
-        PROJECT_WORKBOOK_DICT[sheet] = pull_sheet_vars(PROJECT_WORKBOOK_OBJ.sheet_by_name(sheet))
+    project_workbook = {}   # pylint: disable=C0103
 
-    PROJECT_WORKBOOK_DICT['data_global'] = pull_global_vars(PROJECT_WORKBOOK_OBJ.sheet_by_name('data_global'))
+    PROJECT_WORKBOOK = pull_workbook(PROJECT_DIR, "main.xlsm")
+
+    for sheet in PROJECT_WORKBOOK.sheet_names():
+        project_workbook[sheet] = pull_sheet_vars(PROJECT_WORKBOOK.sheet_by_name(sheet))
+
+    project_workbook['data_global'] = pull_global_vars(PROJECT_WORKBOOK.sheet_by_name('data_global'))
 
 
     if args.make:
         print('{:15}{:25}{:25}'.format("device name", "template fille", "input file"))
         print("+--------------------------------------------------------------+")
-        for device in PROJECT_WORKBOOK_DICT['MAKE']:
-            device['workbook_data'] = {}
+        for device in project_workbook['MAKE']:
 
-            #path to device workbook
+            #print(PROJECT_DIR, "/INPUT/" + device['data_file'])
             device_workbook = pull_workbook(PROJECT_DIR, "INPUT/" + device['data_file'])
+            sheet_vars = {}
 
             # extract data from workbook
             for sheet in device_workbook.sheet_names():
-                device['workbook_data'][sheet] = pull_sheet_vars(device_workbook.sheet_by_name(sheet))
-
+                sheet_vars[sheet] = pull_sheet_vars(device_workbook.sheet_by_name(sheet))
             #set global vars
-            device['workbook_data']['data_global'] = pull_global_vars(device_workbook.sheet_by_name('data_global'))
+
+
+            sheet_vars['data_global'] = pull_global_vars(device_workbook.sheet_by_name('data_global'))
+
+            sheet_vars['data_global']['site_prefix'] = project_workbook['data_global']['site_prefix']
+
+            device['workbook_data'] = sheet_vars
 
             print('{:15}{:25}{:25}'.format(device['device'], device['template_file'], device['data_file']))
 
-            Snip = load_template(device['template_file']).render(**device['workbook_data'])
+            template = load_template(device['template_file'])
+            Snip = template.render(**sheet_vars)
+
             CONFIG_FILE = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
-
             write_config(Snip, CONFIG_FILE)
-
 
     if args.pull:
         print('{:35}{:15}'.format("device name", "IP"))
         print("+--------------------------------------------------------------+")
 
-        for device in PROJECT_WORKBOOK_DICT['MAKE']:
+        for device in project_workbook['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
+
+
 
             devices = {
                 'device_type': device['device_type'],
@@ -168,23 +185,39 @@ if __name__ == '__main__':
 
             net_connect = netmiko.ConnectHandler(**devices)
 
+
             if device['device_type'] == "fortinet":
                 output = net_connect.send_command_timing('config vdom', delay_factor=4)
                 output = net_connect.send_command_timing('edit ' + device['vslice'], delay_factor=4)
                 output = net_connect.send_command('show ')
 
+                ## add chop pass
+                
+                
+
+
+
             elif device['device_type'] == "cisco_nxos":
                 output = net_connect.send_command("show run")
 
+
             Pull_FILE = PROJECT_DIR + "/PULL/" + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
             write_config(output, Pull_FILE)
+
+
+
+
+
+
 
     if args.push:
         print('{:35}{:15}'.format("device name", "IP"))
         print("+--------------------------------------------------------------+")
 
-        for device in PROJECT_WORKBOOK_DICT['MAKE']:
+        for device in project_workbook['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
+
+
 
             devices = {
                 'device_type': device['device_type'],
@@ -200,23 +233,33 @@ if __name__ == '__main__':
 
             net_connect = netmiko.ConnectHandler(**devices)
 
+
+
             if device['device_type'] == "fortinet":
                 output = net_connect.send_command_timing('config vdom', delay_factor=4)
                 output = net_connect.send_command_timing('edit ' + device['vslice'], delay_factor=4)
+
 
                 print(net_connect.find_prompt())
                 output = net_connect.send_config_from_file(CONFIG_FILE)
                 print(output)
 
+
+
                 PUSH_LOG_FILE = PROJECT_DIR + "/PUSH/" + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
                 write_config(output, PUSH_LOG_FILE)
+
+
+
 
     if args.gather:
         print('{:35}{:15}'.format("device name", "IP"))
         print("+--------------------------------------------------------------+")
 
-        for device in PROJECT_WORKBOOK_DICT['MAKE']:
+        for device in project_workbook['MAKE']:
             print('{:35}{:15}'.format(device['device'], device['ip']))
+
+
 
             devices = {
                 'device_type': device['device_type'],
@@ -227,12 +270,15 @@ if __name__ == '__main__':
 
             net_connect = netmiko.ConnectHandler(**devices)
 
+
+
             if device['device_type'] == "fortinet":
                 net_connect.send_command_timing('config vdom', delay_factor=4)
                 net_connect.send_command_timing('edit ' + device['vslice'], delay_factor=4)
 
                 output = net_connect.send_command('fnsysctl more  /etc/upd.dat')
                 final = output.split("|")[0] + '\n'
+
 
                 output = net_connect.send_command('get system status')
                 output = output.split('\n')
