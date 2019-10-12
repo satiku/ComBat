@@ -111,16 +111,9 @@ def write_config(snip, config_file):
 
 def chop(arg_config_file, arg_device_type, arg_chop_file, netmiko_session=None):
 
-
-
-    OUTPUT_FILE = "output.xls"
     wb = xlwt.Workbook()
 
     page = False
-
-
-
-
 
     filter_list = ['firewall_vip',
                    'firewall_address',
@@ -140,8 +133,7 @@ def chop(arg_config_file, arg_device_type, arg_chop_file, netmiko_session=None):
 
     for line in arg_config_file:
 
-        line = line.strip()
-        line = line.split(' ')
+        line = line.strip().split(' ')
 
 
 
