@@ -116,11 +116,9 @@ if __name__ == '__main__':
     parser.add_argument('--push', action='store_true', default=False, help='push conifg')
     parser.add_argument('--gather', action='store_true', default=False, help='gather')
 
-
     args = parser.parse_args()  # pylint: disable=C0103
 
     PROJECT_DIR = str(args.path[0])
-
     PROJECT_WORKBOOK_OBJ = pull_workbook(PROJECT_DIR, "main.xlsm")
     PROJECT_WORKBOOK_DICT = {}
 
@@ -148,10 +146,9 @@ if __name__ == '__main__':
 
             print('{:15}{:25}{:25}'.format(device['device'], device['template_file'], device['data_file']))
 
-            template = load_template(device['template_file'])
-            Snip = template.render(**device['workbook_data'])
-
+            Snip = load_template(device['template_file']).render(**device['workbook_data'])
             CONFIG_FILE = PROJECT_DIR + "/MAKE/" + device['device'] + ".txt"
+
             write_config(Snip, CONFIG_FILE)
 
 
