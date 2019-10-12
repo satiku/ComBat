@@ -112,7 +112,7 @@ def write_config(snip, config_file):
 
 
 if __name__ == '__main__':
-
+    START_TIME =  datetime.datetime.now()
 #    PROJECT_DIRS = os.path.expanduser('~') + "/Documents/Projects/"
 
     parser = argparse.ArgumentParser(description='make some configs.')  # pylint: disable=C0103
@@ -172,7 +172,7 @@ if __name__ == '__main__':
         print("+--------------------------------------------------------------+")
 
         for device in project_workbook['MAKE']:
-            print('{:35}{:15}'.format(device['device'], device['ip']))
+            DEVICE_START_TIME =  datetime.datetime.now()
 
 
 
@@ -203,6 +203,7 @@ if __name__ == '__main__':
 
             Pull_FILE = PROJECT_DIR + "/PULL/" + datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
             write_config(output, Pull_FILE)
+            print('{:25}{:25}{:20}'.format(device['device'], device['ip'], str(datetime.datetime.now() - DEVICE_START_TIME)), flush=True)
 
 
 
@@ -301,3 +302,7 @@ if __name__ == '__main__':
 
             Gather_FILE = PROJECT_DIR + "/GATHER/" +  datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".txt"
             write_config(final, Gather_FILE)
+
+
+
+    print('Total Execution Time : ' + str(datetime.datetime.now() - START_TIME))
