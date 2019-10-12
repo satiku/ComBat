@@ -2,7 +2,7 @@
  ComBat:Module
  maintainer         : Zachary Hudson
  maintainer-email   : zachudson92@gmail.com
- required modules   : os, argparse, datetime, jinja2, xlrd, netmiko
+ required modules   : os, argparse, datetime, jinja2, xlrd, xlwt, netmiko
 """
 
 #lines longer than 80 characters
@@ -13,6 +13,7 @@ import argparse
 import datetime
 import jinja2
 import xlrd
+import xlwt
 import netmiko
 
 
@@ -108,7 +109,141 @@ def write_config(snip, config_file):
             file.write(output_line + '\n')
     file.close()
 
+def chop(arg_config_file, arg_device_type, arg_chop_file, netmiko_session=None):
 
+    wb = xlwt.Workbook()
+
+    page = False
+
+    filter_list = ['firewall_vip',
+                   'firewall_address',
+                   'firewall_service_custom',
+                   'firewall_service_group',
+                   'firewall_vipgrp',
+                   'firewall_policy',
+                   'router_static',
+                   'system_interface',
+                   'firewall_addrgrp'
+                   ]
+
+
+
+
+
+
+    for line in arg_config_file:
+
+        line = line.strip().split(' ')
+
+
+
+        if line[0] == "config":
+            object_index = 2
+
+    # check if  segment is in filter list
+            #print("! " +'_'.join(map(str, line[1:])))
+            if '_'.join(map(str, line[1:])) in filter_list:
+                print("saving: " + '_'.join(map(str, line[1:])), flush=True)
+
+                page = True
+                new_object_properties = ['id']
+
+                ws = wb.add_sheet('_'.join(map(str, line[1:])))
+
+                page_name = '_'.join(map(str, line[1:]))
+
+
+    # enter selectd item  if seed edit and segment is in filter list
+        if line[0] == "edit" and  page:
+            #print('pop')
+            new_object = {}
+           # set objext id to text after edit
+            new_object['id'] = line[1]
+
+
+
+
+        # check if this is a item setting and check segment active
+        if line[0] == "set" and  page:
+
+    # add setting id to poperties list
+            if  line[1] not in new_object_properties:
+                new_object_properties.append(line[1])
+
+
+           # set value
+            new_object[line[1]] = line[2:]
+
+
+        if line[0] == "next"  and  page and page_name == 'firewall_policy':
+            if  "count" not in new_object_properties:
+                new_object_properties.append("count")
+
+            if  "first_hit" not in new_object_properties:
+                new_object_properties.append("first_hit")
+
+            if  "last_hit" not in new_object_properties:
+                new_object_properties.append("last_hit")
+
+            #print(netmiko_session.find_prompt())
+            #print(new_object['id'])
+            policy_stats = net_connect.send_command('diagnose firewall iprope show 00100004 ' + new_object['id'])
+
+
+            policy_stats = policy_stats.split(" ")
+
+            #print(policy_stats, flush=True)
+            #print(len(policy_stats), flush=True)
+
+
+            if len(policy_stats) == 13:
+                new_object["count"] = policy_stats[5].split(':')[1].strip('\n')
+
+                new_object["first_hit"] = policy_stats[9].split(':')[1] + " " + policy_stats[10]
+
+                new_object["last_hit"] = policy_stats[11].split(':')[1] + " " + policy_stats[12]
+
+            if len(policy_stats) == 14:
+                new_object["count"] = policy_stats[6].split(':')[1].strip('\n')
+
+                new_object["first_hit"] = policy_stats[10].split(':')[1] + " " + policy_stats[11]
+
+                new_object["last_hit"] = policy_stats[12].split(':')[1] + " " + policy_stats[13]
+
+
+
+
+            #print(new_object)
+            #pull policy stats
+    # check if reached end of items settings
+        if line[0] == "next"  and  page:
+
+
+            #print(new_object)
+        #    piece_index =  0
+
+    # iterate over dictionary list of items and setting first is ID followed by settings
+            for piece in new_object.items():
+
+                if isinstance(piece[1], list):
+                    ws.write(object_index, new_object_properties.index(piece[0]), ' '.join(map(str, piece[1])))
+                    #print(' '.join(map(str, piece)))
+                else:
+                    ws.write(object_index, new_object_properties.index(piece[0]), piece[1])
+                    #print(piece)
+        #        piece_index = piece_index + 1
+            object_index = object_index +1
+
+
+        if line[0] == "end" and  page:
+
+
+            for i, item in enumerate(new_object_properties):
+
+                ws.write(0, i, item)
+            page = False
+
+    wb.save(arg_chop_file)
 
 
 if __name__ == '__main__':
@@ -282,6 +417,20 @@ if __name__ == '__main__':
 
                 output = net_connect.send_command('get system status')
                 output = output.split('\n')
+
+
+
+                config_output = net_connect.send_command('show ')
+
+                chop_file = PROJECT_DIR + "/GATHER/" +  datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S ") + device['device'] + ".xls"
+
+
+
+                chop(config_output.split("\n"), device['device_type'], chop_file, net_connect)
+
+
+
+
 
                 for line in output:
 
